@@ -15,6 +15,6 @@ pub struct ThemeSpec {
 
 #[derive(Deserialize, Debug)]
 pub struct Theme {
-	name: String,
-	spec: ThemeSpec,
+	pub name: String,
+	pub spec: ThemeSpec,
 }
