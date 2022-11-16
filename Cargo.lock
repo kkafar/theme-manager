@@ -571,6 +571,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
+ "log",
  "log4rs",
  "serde",
  "serde_json",

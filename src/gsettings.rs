@@ -67,6 +67,7 @@ fn set_kitty(theme: &str) {
 }
 
 pub fn set_theme(theme: &Theme) {
+	log::info!("Setting theme: {}", theme.name);
 	set_desktop(&theme.spec.desktop);
 	set_mouse(&theme.spec.mouse);
 	set_controls(&theme.spec.controls);
