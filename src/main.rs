@@ -2,6 +2,7 @@
 
 mod config;
 mod theme;
+mod gsettings;
 
 use std::path::PathBuf;
 use clap::{Parser, Subcommand};
@@ -36,6 +37,19 @@ fn main() {
 	let cli = Cli::parse();
 
 	let config = Config::try_from(cli.config).unwrap();
-
 	println!("{:?}", config);
+
+	match cli.command {
+		Commands::Set { name } => {
+			if let Some(name) = name {
+				let theme_opt = config.theme_for_name(&name);
+				if let Some(theme) = theme_opt {
+					println!("Setting theme");
+					gsettings::set_theme(theme)
+				} else {
+					println!("Failed to find theme for given name");
+				}
+			}
+		}
+	}
 }
