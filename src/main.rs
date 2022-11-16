@@ -3,6 +3,7 @@
 mod config;
 mod theme;
 mod gsettings;
+mod util;
 
 use std::path::PathBuf;
 use clap::{Parser, Subcommand};
@@ -14,12 +15,12 @@ use crate::config::Config;
 #[command(author, version, about)]
 struct Cli {
 	/// Path to config file - see project readme for config file description
-	#[arg(long, value_name = "FILE")]
+	#[arg(long, value_name = "FILE", value_parser = util::file_exists)]
 	config: PathBuf,
 
 	/// Run in verbose mode
-	#[arg(short, long)]
-	verbose: Option<bool>,
+	#[arg(short, long, default_value_t = false)]
+	verbose: bool,
 
 	/// Path to log file - if not specified logs are printed to stdout
 	#[arg(long, value_name = "FILE")]
@@ -31,7 +32,7 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-	// Sets theme by name or basing on current time
+	/// Sets theme by name or basing on current time
 	Set {
 		/// Name of the theme to apply
 		name: Option<String>
@@ -89,6 +90,8 @@ fn main() {
 				} else {
 					log::error!("Failed to find theme for given name: {}", name);
 				}
+			} else {
+				log::error!("Setting theme basing on time is not supported yet");
 			}
 		}
 	}
