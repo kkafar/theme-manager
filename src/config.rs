@@ -10,10 +10,8 @@ pub struct Config {
 	default: Option<String>,
 }
 
-impl TryFrom<PathBuf> for Config {
-	type Error = Box<dyn Error>;
-
-	fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
+impl Config {
+	pub fn from_file(path: PathBuf) -> Result<Self, Box<dyn Error>> {
 		let file = File::open(path)?;
 		let reader = BufReader::new(file);
 		let config: Config = serde_json::from_reader(reader)?;
@@ -21,11 +19,10 @@ impl TryFrom<PathBuf> for Config {
 	}
 }
 
-// impl Config {
-// 	pub fn load_from_file(path: PathBuf) -> Result<Self, Box<dyn Error>> {
-// 		let file = File::open(path)?;
-// 		let reader = BufReader::new(file);
-// 		let config: Config = serde_json::from_reader(reader)?;
-// 		Ok(config)
-// 	}
-// }
+impl TryFrom<PathBuf> for Config {
+	type Error = Box<dyn Error>;
+
+	fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
+		Self::from_file(path)
+	}
+}
