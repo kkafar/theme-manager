@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use chrono::{DateTime, Utc, Timelike};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -12,17 +13,23 @@ pub struct ThemeSpec {
 	pub kitty: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone, Copy)]
 pub struct TimeSpec {
-	hour: i32,
-	minutes: i32,
+	hour: u32,
+	minute: u32,
 }
 
 // FIXME: Don't rely on happy path
 impl From<String> for TimeSpec {
 	fn from(data: String) -> Self {
-		let mut dets = data.split(':').map(|t| t.parse::<i32>().unwrap());
-		TimeSpec { hour: dets.next().unwrap(), minutes: dets.next().unwrap() }
+		let mut dets = data.split(':').map(|t| t.parse::<u32>().unwrap());
+		TimeSpec { hour: dets.next().unwrap(), minute: dets.next().unwrap() }
+	}
+}
+
+impl From<DateTime<Utc>> for TimeSpec {
+	fn from(date: DateTime<Utc>) -> Self {
+		TimeSpec { hour: date.hour(), minute: date.minute() }
 	}
 }
 
@@ -32,6 +39,25 @@ pub struct TimeSpan {
 	start: TimeSpec,
 	#[serde(with = "timespec")]
 	stop: TimeSpec,
+}
+
+impl TimeSpan {
+	pub fn contains(&self, timespec: &TimeSpec) -> bool {
+		#![allow(clippy::comparison_chain)]
+		if self.start.hour < self.stop.hour {
+			(timespec.hour > self.start.hour && timespec.hour < self.stop.hour) ||
+				(timespec.hour == self.start.hour && timespec.minute >= self.start.minute) ||
+				(timespec.hour == self.stop.hour && timespec.minute < self.stop.minute)
+		} else if self.start.hour > self.stop.hour {
+			!((timespec.hour > self.stop.hour && timespec.hour < self.start.hour) ||
+				(timespec.hour == self.stop.hour && timespec.minute >= self.stop.minute) ||
+				(timespec.hour == self.start.hour && timespec.minute < self.start.minute))
+		} else if self.start.hour == self.stop.hour {
+			timespec.hour == self.start.hour && timespec.minute >= self.start.minute && timespec.minute < self.stop.minute
+		} else {
+			false
+		}
+	}
 }
 
 #[derive(Deserialize, Debug)]

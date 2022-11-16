@@ -2,7 +2,7 @@ use std::{path::PathBuf, fs::File, error::Error, io::BufReader};
 
 use serde::Deserialize;
 
-use crate::theme::Theme;
+use crate::theme::{Theme, TimeSpec};
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -22,6 +22,19 @@ impl Config {
 		for theme in &self.themes {
 			if theme.name == name {
 				return Some(theme)
+			}
+		}
+		None
+	}
+
+	pub fn theme_for_time(&self, date: chrono::DateTime<chrono::Utc>) -> Option<&Theme> {
+		let timespec = TimeSpec::from(date);
+
+		for theme in &self.themes {
+			if let Some(span) = &theme.span {
+				if span.contains(&timespec) {
+					return Some(theme)
+				}
 			}
 		}
 		None
