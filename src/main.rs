@@ -1,6 +1,12 @@
+#[allow(dead_code)]
+
+mod config;
+mod theme;
 
 use std::path::PathBuf;
 use clap::{Parser, Subcommand};
+
+use crate::config::Config;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
@@ -27,8 +33,9 @@ enum Commands {
 }
 
 fn main() {
-	let _cli = Cli::parse();
-	println!("Hello world");
+	let cli = Cli::parse();
+
+	let config = Config::try_from(cli.config).unwrap();
+
+	println!("{:?}", config);
 }
-
-
