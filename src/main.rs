@@ -6,6 +6,7 @@ mod gsettings;
 mod util;
 
 use std::path::PathBuf;
+use chrono::Utc;
 use clap::{Parser, Subcommand};
 use log4rs::{append::{console::ConsoleAppender, file::FileAppender}, encode::pattern::PatternEncoder, config::{Logger, Root, Appender}, Handle};
 
@@ -79,7 +80,6 @@ fn main() {
 	let _log_handle = init_logging(&cli);
 
 	let config = Config::try_from(cli.config).unwrap();
-	println!("{:?}", config);
 
 	match cli.command {
 		Commands::Set { name } => {
@@ -90,8 +90,10 @@ fn main() {
 				} else {
 					log::error!("Failed to find theme for given name: {}", name);
 				}
+			} else if let Some(theme) = config.theme_for_time(Utc::now()) {
+				gsettings::set_theme(theme);
 			} else {
-				log::error!("Setting theme basing on time is not supported yet");
+				log::error!("Failed to find theme for current time -- not taking any action");
 			}
 		}
 	}
