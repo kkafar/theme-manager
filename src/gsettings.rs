@@ -4,7 +4,6 @@ use log::{info, error};
 use crate::theme::Theme;
 
 fn set_desktop(theme: &str) {
-	log::info!("Setting desktop theme: {}", theme);
 	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.theme")
@@ -29,7 +28,6 @@ fn set_desktop(theme: &str) {
 }
 
 fn set_mouse(theme: &str) {
-	log::info!("Setting mouse theme: {}", theme);
 	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.desktop.interface")
@@ -54,7 +52,6 @@ fn set_mouse(theme: &str) {
 }
 
 fn set_controls(theme: &str) {
-	log::info!("Setting controls theme: {}", theme);
 	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.desktop.interface")
@@ -79,7 +76,6 @@ fn set_controls(theme: &str) {
 }
 
 fn set_icons(theme: &str) {
-	log::info!("Setting icons theme: {}", theme);
 	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.desktop.interface")
@@ -104,7 +100,6 @@ fn set_icons(theme: &str) {
 }
 
 fn set_borders(theme: &str) {
-	log::info!("Setting borders theme: {}", theme);
 	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.desktop.wm.preferences")
@@ -129,7 +124,6 @@ fn set_borders(theme: &str) {
 }
 
 fn set_wallpaper(path: &str) {
-	log::info!("Setting wallpaper to: {}", path);
 	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.desktop.background")
@@ -154,7 +148,6 @@ fn set_wallpaper(path: &str) {
 }
 
 fn set_kitty(theme: &str) {
-	log::info!("Setting kitty theme: {}", theme);
 	let result = Command::new("kitty")
 		.arg("+kitten")
 		.arg("themes")
@@ -179,7 +172,6 @@ fn set_kitty(theme: &str) {
 }
 
 pub fn set_theme(theme: &Theme) {
-	log::info!("Setting theme: {}", theme.name);
 	set_desktop(&theme.spec.desktop);
 	set_mouse(&theme.spec.mouse);
 	set_controls(&theme.spec.controls);
