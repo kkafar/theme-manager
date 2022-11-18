@@ -1,14 +1,31 @@
 use std::process::Command;
+use log::{info, error};
+
 use crate::theme::Theme;
 
 fn set_desktop(theme: &str) {
 	log::info!("Setting desktop theme: {}", theme);
-	let _result = Command::new("gsettings")
+	let result = Command::new("gsettings")
 		.arg("set")
 		.arg("org.cinnamon.theme")
 		.arg("name")
 		.arg(theme)
 		.status();
+
+	match result {
+		Ok(status) => {
+			if status.success() {
+				info!("Desktop theme set to: {}", theme);
+			} else if let Some(ret_code) = status.code() {
+				error!("Failed to set desktop theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
+			} else {
+				error!("Failed to set desktop theme to: {}. Process was most likely interrupted", theme);
+			}
+		}
+		Err(err) => {
+			error!("Failed to execute the process with error: {}", err);
+		}
+	}
 }
 
 fn set_mouse(theme: &str) {
