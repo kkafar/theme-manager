@@ -1,7 +1,29 @@
-use std::process::Command;
+use std::process::{Command, ExitStatus};
 use log::{info, error};
 
 use crate::theme::Theme;
+
+/// Handles command result / command failure
+fn handle_result(
+	result: Result<ExitStatus, std::io::Error>,
+	success_msg: String,
+	failure_msg: String)
+{
+	match result {
+		Ok(status) => {
+			if status.success() {
+				info!("{}", success_msg);
+			} else if let Some(ret_code) = status.code() {
+				error!("{}. Process returned non-zero return code: {}", failure_msg, ret_code);
+			} else {
+				error!("{}. Process was most likely interrupted", failure_msg);
+			}
+		}
+		Err(err) => {
+			error!("Failed to execute the process with error: {}", err);
+		}
+	}
+}
 
 fn set_desktop(theme: &str) {
 	let result = Command::new("gsettings")
@@ -11,20 +33,10 @@ fn set_desktop(theme: &str) {
 		.arg(theme)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Desktop theme set to: {}", theme);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set desktop theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
-			} else {
-				error!("Failed to set desktop theme to: {}. Process was most likely interrupted", theme);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Desktop theme set to: {}", theme),
+		format!("Failed to set desktop theme to: {}", theme));
 }
 
 fn set_mouse(theme: &str) {
@@ -35,20 +47,10 @@ fn set_mouse(theme: &str) {
 		.arg(theme)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Mouse theme set to: {}", theme);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set mouse theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
-			} else {
-				error!("Failed to set mouse theme to: {}. Process was most likely interrupted", theme);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Mouse theme set to: {}", theme),
+		format!("Failed to set mouse theme to: {}", theme));
 }
 
 fn set_controls(theme: &str) {
@@ -59,20 +61,10 @@ fn set_controls(theme: &str) {
 		.arg(theme)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Controls theme set to: {}", theme);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set controls theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
-			} else {
-				error!("Failed to set controls theme to: {}. Process was most likely interrupted", theme);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Controls theme set to: {}", theme),
+		format!("Failed to set controls theme to: {}", theme));
 }
 
 fn set_icons(theme: &str) {
@@ -83,20 +75,10 @@ fn set_icons(theme: &str) {
 		.arg(theme)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Icons theme set to: {}", theme);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set icons theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
-			} else {
-				error!("Failed to set icons theme to: {}. Process was most likely interrupted", theme);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Icons theme set to: {}", theme),
+		format!("Failed to set icons theme to: {}", theme));
 }
 
 fn set_borders(theme: &str) {
@@ -107,20 +89,10 @@ fn set_borders(theme: &str) {
 		.arg(theme)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Borders theme set to: {}", theme);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set borders theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
-			} else {
-				error!("Failed to set borders theme to: {}. Process was most likely interrupted", theme);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Borders theme set to: {}", theme),
+		format!("Failed to set borders theme to: {}", theme));
 }
 
 fn set_wallpaper(path: &str) {
@@ -131,20 +103,10 @@ fn set_wallpaper(path: &str) {
 		.arg(path)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Wallpaper set to: {}", path);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set wallpaper to: {}. Process returned non-zero return code: {}", path, ret_code);
-			} else {
-				error!("Failed to set wallpaper to: {}. Process was most likely interrupted", path);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Wallpaper set to: {}", path),
+		format!("Failed to set wallpaper to: {}", path));
 }
 
 fn set_kitty(theme: &str) {
@@ -155,20 +117,10 @@ fn set_kitty(theme: &str) {
 		.arg(theme)
 		.status();
 
-	match result {
-		Ok(status) => {
-			if status.success() {
-				info!("Kitty theme set to: {}", theme);
-			} else if let Some(ret_code) = status.code() {
-				error!("Failed to set kitty theme to: {}. Process returned non-zero return code: {}", theme, ret_code);
-			} else {
-				error!("Failed to set kitty theme to: {}. Process was most likely interrupted", theme);
-			}
-		}
-		Err(err) => {
-			error!("Failed to execute the process with error: {}", err);
-		}
-	}
+	handle_result(
+		result,
+		format!("Kitty theme set to: {}", theme),
+		format!("Failed to set kitty theme to: {}", theme));
 }
 
 pub fn set_theme(theme: &Theme) {
