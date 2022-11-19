@@ -1,5 +1,6 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, fmt::Display};
 use chrono::{DateTime, Utc, Timelike};
+use itertools::Itertools;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -19,11 +20,23 @@ pub struct TimeSpec {
 	minute: u32,
 }
 
-// FIXME: Don't rely on happy path
-impl From<String> for TimeSpec {
-	fn from(data: String) -> Self {
-		let mut dets = data.split(':').map(|t| t.parse::<u32>().unwrap());
-		TimeSpec { hour: dets.next().unwrap(), minute: dets.next().unwrap() }
+impl TryFrom<String> for TimeSpec {
+	type Error = ();
+	fn try_from(data: String) -> Result<Self, ()> {
+		let dets: Option<(Option<u32>, Option<u32>)> = data.split(':').map(|t| t.parse::<u32>().ok()).collect_tuple();
+
+		if let Some(dets) = dets {
+			let None = dets.0 else {
+				return Err(());
+			};
+
+			let None = dets.1 else {
+				return Err(());
+			};
+
+			return Ok(TimeSpec { hour: dets.0.unwrap(), minute: dets.1.unwrap() });
+		}
+		Err(())
 	}
 }
 
@@ -60,6 +73,29 @@ impl TimeSpan {
 	}
 }
 
+#[derive(Debug)]
+pub enum ParseError {
+	Message(String),
+	InvalidDateFormat,
+}
+
+impl Display for ParseError {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			ParseError::Message(msg) => f.write_str(msg),
+			ParseError::InvalidDateFormat => f.write_str("invalid time span format")
+		}
+	}
+}
+
+impl std::error::Error for ParseError {}
+
+impl serde::de::Error for ParseError {
+	fn custom<T: Display>(msg: T) -> Self where T:std::fmt::Display {
+		ParseError::Message(msg.to_string())
+	}
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Theme {
 	pub name: String,
@@ -68,14 +104,21 @@ pub struct Theme {
 }
 
 mod timespec {
-	use serde::{Deserializer, Deserialize};
+	use serde::{Deserializer, Deserialize, de::Error};
 	use super::TimeSpec;
+	use log::error;
+	use super::ParseError;
 
 	pub fn deserialize<'de, D>(deserializer: D) -> Result<TimeSpec, D::Error>
 	where
 		D: Deserializer<'de>
 	{
 		let s = String::deserialize(deserializer)?;
-		Ok(TimeSpec::from(s))
+		if let Ok(timespec) = TimeSpec::try_from(s) {
+			Ok(timespec)
+		} else {
+			// https://stackoverflow.com/questions/66230715/make-my-own-error-for-serde-json-deserialize
+			Err(ParseError::InvalidDateFormat).map_err(D::Error::custom)
+		}
 	}
 }

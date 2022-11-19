@@ -46,7 +46,6 @@ fn init_logging(cli: &Cli) -> Handle {
 
 	let mut config_builder = log4rs::Config::builder();
 
-	// FIXME: Sanitize this path
 	if let Some(file) = &cli.log_file {
 		let file_appender = FileAppender::builder()
 			.encoder(Box::new(PatternEncoder::new(&log_pattern)))
