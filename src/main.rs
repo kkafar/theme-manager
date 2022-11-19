@@ -8,6 +8,7 @@ mod util;
 use std::path::PathBuf;
 use chrono::Utc;
 use clap::{Parser, Subcommand};
+use log::error;
 use log4rs::{append::{console::ConsoleAppender, file::FileAppender}, encode::pattern::PatternEncoder, config::{Logger, Root, Appender}, Handle};
 
 use crate::config::Config;
@@ -45,7 +46,6 @@ fn init_logging(cli: &Cli) -> Handle {
 
 	let mut config_builder = log4rs::Config::builder();
 
-	// FIXME: Sanitize this path
 	if let Some(file) = &cli.log_file {
 		let file_appender = FileAppender::builder()
 			.encoder(Box::new(PatternEncoder::new(&log_pattern)))
@@ -88,12 +88,12 @@ fn main() {
 				if let Some(theme) = theme_opt {
 					gsettings::set_theme(theme)
 				} else {
-					log::error!("Failed to find theme for given name: {}", name);
+					error!("Failed to find theme for given name: {}", name);
 				}
 			} else if let Some(theme) = config.theme_for_time(Utc::now()) {
 				gsettings::set_theme(theme);
 			} else {
-				log::error!("Failed to find theme for current time -- not taking any action");
+				error!("Failed to find theme for current time -- not taking any action");
 			}
 		}
 	}
