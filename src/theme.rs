@@ -106,7 +106,6 @@ pub struct Theme {
 mod timespec {
 	use serde::{Deserializer, Deserialize, de::Error};
 	use super::TimeSpec;
-	use log::error;
 	use super::ParseError;
 
 	pub fn deserialize<'de, D>(deserializer: D) -> Result<TimeSpec, D::Error>
