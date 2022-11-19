@@ -26,15 +26,17 @@ impl TryFrom<String> for TimeSpec {
 		let dets: Option<(Option<u32>, Option<u32>)> = data.split(':').map(|t| t.parse::<u32>().ok()).collect_tuple();
 
 		if let Some(dets) = dets {
-			let None = dets.0 else {
-				return Err(());
+			let hour = match dets.0 {
+				Some(hour) => hour,
+				None => return Err(())
 			};
 
-			let None = dets.1 else {
-				return Err(());
+			let minute = match dets.1 {
+				Some(minute) => minute,
+				None => return Err(())
 			};
 
-			return Ok(TimeSpec { hour: dets.0.unwrap(), minute: dets.1.unwrap() });
+			return Ok(TimeSpec { hour, minute });
 		}
 		Err(())
 	}

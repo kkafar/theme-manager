@@ -74,14 +74,17 @@ fn init_logging(cli: &Cli) -> Handle {
 	log4rs::init_config(config).unwrap()
 }
 
-fn main() -> Result<(), ()> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let cli = Cli::parse();
 
 	let _log_handle = init_logging(&cli);
 
-	let Ok(config) = Config::try_from(cli.config) else {
-		error!("Failed to load config");
-		return Err(());
+	let config = match Config::try_from(cli.config) {
+		Ok(config) => config,
+		Err(err) => {
+			error!("Failed to load config with err: {}", err);
+			return Err(err);
+		}
 	};
 
 	let gsettings = gsettings::Gsettings::new();

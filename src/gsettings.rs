@@ -29,7 +29,7 @@ fn handle_result(
 }
 
 pub struct Gsettings {
-	euid: String
+	dbus_session_bus_address: String
 }
 
 impl Gsettings {
@@ -40,7 +40,7 @@ impl Gsettings {
 			geteuid()
 		};
 		debug!("Creating Gsettings insance with euid: {}", euid);
-		Gsettings { euid: euid.to_string() }
+		Gsettings { dbus_session_bus_address: format!("unix:path=/run/user/{}/bus", euid) }
 	}
 
 	fn set_desktop(&self, theme: &str) {
@@ -49,7 +49,7 @@ impl Gsettings {
 			.arg("org.cinnamon.theme")
 			.arg("name")
 			.arg(theme)
-			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.euid)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
 			.status();
 
 		handle_result(
@@ -64,7 +64,7 @@ impl Gsettings {
 			.arg("org.cinnamon.desktop.interface")
 			.arg("cursor-theme")
 			.arg(theme)
-			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.euid)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
 			.status();
 
 		handle_result(
@@ -79,7 +79,7 @@ impl Gsettings {
 			.arg("org.cinnamon.desktop.interface")
 			.arg("gtk-theme")
 			.arg(theme)
-			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.euid)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
 			.status();
 
 		handle_result(
@@ -94,7 +94,7 @@ impl Gsettings {
 			.arg("org.cinnamon.desktop.interface")
 			.arg("icon-theme")
 			.arg(theme)
-			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.euid)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
 			.status();
 
 		handle_result(
@@ -109,7 +109,7 @@ impl Gsettings {
 			.arg("org.cinnamon.desktop.wm.preferences")
 			.arg("theme")
 			.arg(theme)
-			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.euid)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
 			.status();
 
 		handle_result(
@@ -124,7 +124,7 @@ impl Gsettings {
 			.arg("org.cinnamon.desktop.background")
 			.arg("picture-uri")
 			.arg(path)
-			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.euid)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
 			.status();
 
 		handle_result(
