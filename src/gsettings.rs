@@ -1,7 +1,10 @@
 use std::process::{Command, ExitStatus};
-use log::{info, error};
+use libc::geteuid;
+use log::{info, error, debug};
 
 use crate::theme::Theme;
+
+const DBUS_SESSION_BUS_ADDRESS_KEY: &str = "DBUS_SESSION_BUS_ADDRESS";
 
 /// Handles command result / command failure
 fn handle_result(
@@ -25,113 +28,135 @@ fn handle_result(
 	}
 }
 
-fn set_desktop(theme: &str) {
-	let result = Command::new("gsettings")
-		.arg("set")
-		.arg("org.cinnamon.theme")
-		.arg("name")
-		.arg(theme)
-		.status();
-
-	handle_result(
-		result,
-		format!("Desktop theme set to: {}", theme),
-		format!("Failed to set desktop theme to: {}", theme));
+pub struct Gsettings {
+	dbus_session_bus_address: String
 }
 
-fn set_mouse(theme: &str) {
-	let result = Command::new("gsettings")
-		.arg("set")
-		.arg("org.cinnamon.desktop.interface")
-		.arg("cursor-theme")
-		.arg(theme)
-		.status();
+impl Gsettings {
+	pub fn new() -> Self {
+		// Can I check somehow whether this call failed?
+		// Or does in not fail?
+		let euid = unsafe {
+			geteuid()
+		};
+		debug!("Creating Gsettings insance with euid: {}", euid);
+		Gsettings { dbus_session_bus_address: format!("unix:path=/run/user/{}/bus", euid) }
+	}
 
-	handle_result(
-		result,
-		format!("Mouse theme set to: {}", theme),
-		format!("Failed to set mouse theme to: {}", theme));
-}
+	fn set_desktop(&self, theme: &str) {
+		let result = Command::new("gsettings")
+			.arg("set")
+			.arg("org.cinnamon.theme")
+			.arg("name")
+			.arg(theme)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+			.status();
 
-fn set_controls(theme: &str) {
-	let result = Command::new("gsettings")
-		.arg("set")
-		.arg("org.cinnamon.desktop.interface")
-		.arg("gtk-theme")
-		.arg(theme)
-		.status();
+		handle_result(
+			result,
+			format!("Desktop theme set to: {}", theme),
+			format!("Failed to set desktop theme to: {}", theme));
+	}
 
-	handle_result(
-		result,
-		format!("Controls theme set to: {}", theme),
-		format!("Failed to set controls theme to: {}", theme));
-}
+	fn set_mouse(&self, theme: &str) {
+		let result = Command::new("gsettings")
+			.arg("set")
+			.arg("org.cinnamon.desktop.interface")
+			.arg("cursor-theme")
+			.arg(theme)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+			.status();
 
-fn set_icons(theme: &str) {
-	let result = Command::new("gsettings")
-		.arg("set")
-		.arg("org.cinnamon.desktop.interface")
-		.arg("icon-theme")
-		.arg(theme)
-		.status();
+		handle_result(
+			result,
+			format!("Mouse theme set to: {}", theme),
+			format!("Failed to set mouse theme to: {}", theme));
+	}
 
-	handle_result(
-		result,
-		format!("Icons theme set to: {}", theme),
-		format!("Failed to set icons theme to: {}", theme));
-}
+	fn set_controls(&self, theme: &str) {
+		let result = Command::new("gsettings")
+			.arg("set")
+			.arg("org.cinnamon.desktop.interface")
+			.arg("gtk-theme")
+			.arg(theme)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+			.status();
 
-fn set_borders(theme: &str) {
-	let result = Command::new("gsettings")
-		.arg("set")
-		.arg("org.cinnamon.desktop.wm.preferences")
-		.arg("theme")
-		.arg(theme)
-		.status();
+		handle_result(
+			result,
+			format!("Controls theme set to: {}", theme),
+			format!("Failed to set controls theme to: {}", theme));
+	}
 
-	handle_result(
-		result,
-		format!("Borders theme set to: {}", theme),
-		format!("Failed to set borders theme to: {}", theme));
-}
+	fn set_icons(&self, theme: &str) {
+		let result = Command::new("gsettings")
+			.arg("set")
+			.arg("org.cinnamon.desktop.interface")
+			.arg("icon-theme")
+			.arg(theme)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+			.status();
 
-fn set_wallpaper(path: &str) {
-	let result = Command::new("gsettings")
-		.arg("set")
-		.arg("org.cinnamon.desktop.background")
-		.arg("picture-uri")
-		.arg(path)
-		.status();
+		handle_result(
+			result,
+			format!("Icons theme set to: {}", theme),
+			format!("Failed to set icons theme to: {}", theme));
+	}
 
-	handle_result(
-		result,
-		format!("Wallpaper set to: {}", path),
-		format!("Failed to set wallpaper to: {}", path));
-}
+	fn set_borders(&self, theme: &str) {
+		let result = Command::new("gsettings")
+			.arg("set")
+			.arg("org.cinnamon.desktop.wm.preferences")
+			.arg("theme")
+			.arg(theme)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+			.status();
 
-fn set_kitty(theme: &str) {
-	let result = Command::new("kitty")
-		.arg("+kitten")
-		.arg("themes")
-		.arg("--reload-in=all")
-		.arg(theme)
-		.status();
+		handle_result(
+			result,
+			format!("Borders theme set to: {}", theme),
+			format!("Failed to set borders theme to: {}", theme));
+	}
 
-	handle_result(
-		result,
-		format!("Kitty theme set to: {}", theme),
-		format!("Failed to set kitty theme to: {}", theme));
-}
+	fn set_wallpaper(&self, path: &str) {
+		let result = Command::new("gsettings")
+			.arg("set")
+			.arg("org.cinnamon.desktop.background")
+			.arg("picture-uri")
+			.arg(path)
+			.env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+			.status();
 
-pub fn set_theme(theme: &Theme) {
-	set_desktop(&theme.spec.desktop);
-	set_mouse(&theme.spec.mouse);
-	set_controls(&theme.spec.controls);
-	set_icons(&theme.spec.icons);
-	set_borders(&theme.spec.borders);
-	set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
+		handle_result(
+			result,
+			format!("Wallpaper set to: {}", path),
+			format!("Failed to set wallpaper to: {}", path));
+	}
 
-	if let Some(kitty_theme) = &theme.spec.kitty {
-		set_kitty(kitty_theme);
+	fn set_kitty(&self, theme: &str) {
+		let result = Command::new("kitty")
+			.arg("+kitten")
+			.arg("themes")
+			.arg("--reload-in=all")
+			.arg(theme)
+			.status();
+
+		handle_result(
+			result,
+			format!("Kitty theme set to: {}", theme),
+			format!("Failed to set kitty theme to: {}", theme));
+	}
+
+	pub fn set_theme(&self, theme: &Theme) {
+		self.set_desktop(&theme.spec.desktop);
+		self.set_mouse(&theme.spec.mouse);
+		self.set_controls(&theme.spec.controls);
+		self.set_icons(&theme.spec.icons);
+		self.set_borders(&theme.spec.borders);
+		self.set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
+
+		if let Some(kitty_theme) = &theme.spec.kitty {
+			self.set_kitty(kitty_theme);
+		}
 	}
 }

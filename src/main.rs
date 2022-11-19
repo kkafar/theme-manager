@@ -74,27 +74,36 @@ fn init_logging(cli: &Cli) -> Handle {
 	log4rs::init_config(config).unwrap()
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let cli = Cli::parse();
 
 	let _log_handle = init_logging(&cli);
 
-	let config = Config::try_from(cli.config).unwrap();
+	let config = match Config::try_from(cli.config) {
+		Ok(config) => config,
+		Err(err) => {
+			error!("Failed to load config with err: {}", err);
+			return Err(err);
+		}
+	};
+
+	let gsettings = gsettings::Gsettings::new();
 
 	match cli.command {
 		Commands::Set { name } => {
 			if let Some(name) = name {
 				let theme_opt = config.theme_for_name(&name);
 				if let Some(theme) = theme_opt {
-					gsettings::set_theme(theme)
+					gsettings.set_theme(theme)
 				} else {
 					error!("Failed to find theme for given name: {}", name);
 				}
 			} else if let Some(theme) = config.theme_for_time(Utc::now()) {
-				gsettings::set_theme(theme);
+				gsettings.set_theme(theme);
 			} else {
 				error!("Failed to find theme for current time -- not taking any action");
 			}
 		}
 	}
+	Ok(())
 }
