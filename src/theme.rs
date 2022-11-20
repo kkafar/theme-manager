@@ -1,5 +1,5 @@
 use std::{path::PathBuf, fmt::Display};
-use chrono::{DateTime, Utc, Timelike};
+use chrono::{DateTime, Timelike, Local};
 use itertools::Itertools;
 use serde::Deserialize;
 
@@ -42,8 +42,8 @@ impl TryFrom<String> for TimeSpec {
 	}
 }
 
-impl From<DateTime<Utc>> for TimeSpec {
-	fn from(date: DateTime<Utc>) -> Self {
+impl From<DateTime<Local>> for TimeSpec {
+	fn from(date: DateTime<Local>) -> Self {
 		TimeSpec { hour: date.hour(), minute: date.minute() }
 	}
 }
