@@ -6,7 +6,7 @@ mod gsettings;
 mod util;
 
 use std::path::PathBuf;
-use chrono::Utc;
+use chrono::{Local};
 use clap::{Parser, Subcommand};
 use log::error;
 use log4rs::{append::{console::ConsoleAppender, file::FileAppender}, encode::pattern::PatternEncoder, config::{Logger, Root, Appender}, Handle};
@@ -98,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 				} else {
 					error!("Failed to find theme for given name: {}", name);
 				}
-			} else if let Some(theme) = config.theme_for_time(Utc::now()) {
+			} else if let Some(theme) = config.theme_for_time(Local::now()) {
 				gsettings.set_theme(theme);
 			} else {
 				error!("Failed to find theme for current time -- not taking any action");

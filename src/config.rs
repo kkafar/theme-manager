@@ -27,7 +27,7 @@ impl Config {
 		None
 	}
 
-	pub fn theme_for_time(&self, date: chrono::DateTime<chrono::Utc>) -> Option<&Theme> {
+	pub fn theme_for_time(&self, date: chrono::DateTime<chrono::Local>) -> Option<&Theme> {
 		let timespec = TimeSpec::from(date);
 
 		for theme in &self.themes {
