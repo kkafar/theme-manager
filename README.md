@@ -2,6 +2,30 @@
 
 Simplified CLI for theme management for Linux Mint Cinnamon
 
+## Installation
+
+This tool has not been published in ant public registry (e.g. [crates.io](https://crates.io/)) yet.
+
+However you can install it by cloning this repo and running `cargo install`:
+
+```
+git clone git@github.com:kkafar/theme-manager.git theme-manager
+cargo install --path theme-manager
+```
+
+To run this tool periodicaly [`cron`](https://en.wikipedia.org/wiki/Cron) can be used:
+
+```
+SHELL=/bin/bash
+MAILTO=kacperkafara.aux@gmail.com
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:<YOUR_HOME_DIR>/.cargo/bin
+
+# Change theme. Check twice in an hour.
+01 * * * * theme-manager --verbose --log-file <PATH_TO_LOG_FILE> --config <PATH_TO_CONFIG> set
+31 * * * * theme-manager --verbose --log-file <PATH_TO_LOG_FILE> --config <PATH_TO_CONFIG> set
+```
+
+
 ## Usage
 
 ```
