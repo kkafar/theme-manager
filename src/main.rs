@@ -91,9 +91,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	match cli.command {
 		Commands::Set { name } => {
+			// First we check whether user specified a concrete theme
+			// If no concrete theme was specified we look for theme assigned to current time
+			// If no such theme is found we log error and exit gracefully
 			if let Some(name) = name {
-				let theme_opt = config.theme_for_name(&name);
-				if let Some(theme) = theme_opt {
+				// If so, we check wheter theme of given name is present in config file
+				// In case such theme does not exist we print error and exit gracefully
+				if let Some(theme) = config.theme_for_name(&name) {
 					gsettings.set_theme(theme)
 				} else {
 					error!("Failed to find theme for given name: {}", name);
