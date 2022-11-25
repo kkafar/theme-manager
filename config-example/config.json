@@ -1,0 +1,37 @@
+{
+	"themes": [
+		{
+			"name": "dark",
+			"spec": {
+				"desktop": "Orchis-Grey-Dark",
+				"mouse": "Vimix-cursors",
+				"controls": "Orchis-Grey-Dark",
+				"icons": "Tela-circle-purple",
+				"borders": "Orchis-Purple-Dark",
+				"wallpaper": "file://<ABSOLUTE_PATH_TO_WALLPAPER>",
+				"kitty": "Dark-mint-y"
+			},
+			"span": {
+				"start": "15:30",
+				"stop": "7:30"
+			}
+		},
+		{
+			"name": "light",
+			"spec": {
+				"desktop": "Orchis-Grey",
+				"mouse": "Vimix-white-cursors",
+				"controls": "Orchis-Purple",
+				"icons": "Tela-circle-purple",
+				"borders": "Orchis-Purple",
+				"wallpaper": "file://<ABSOLUTE_PATH_TO_WALLPAPER>",
+				"kitty": "Atom One Light"
+			},
+			"span": {
+				"start": "7:30",
+				"stop": "15:30"
+			}
+		}
+	],
+	"default": "dark"
+}
