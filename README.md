@@ -32,3 +32,15 @@ Options:
   * if there is no such theme, default one is used
   * if default is not specified - no changes are performed
   * **config is loaded from default location: `$HOME/.config/theme-manager/config.json`**
+
+### Config specification
+
+See [config-example/config.json] for config example.
+
+**Note**: Path to wallpaper must be prepended with `file://` prefix. `gsettings` (which is used underneath) requires it and I did not write any better validation / automatic prefix prepending yet.
+
+Tracking issue:
+
+* #28
+
+**Note**: `kitty` param in theme specification is optional (rest of them are required) - it is option for setting theme of terminal emulator of my choice.
