@@ -17,7 +17,6 @@ To run this tool periodicaly [`cron`](https://en.wikipedia.org/wiki/Cron) can be
 
 ```
 SHELL=/bin/bash
-MAILTO=kacperkafara.aux@gmail.com
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:<YOUR_HOME_DIR>/.cargo/bin
 
 # Change theme. Check twice in an hour.
