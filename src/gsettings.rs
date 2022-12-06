@@ -123,10 +123,10 @@ impl Gsettings {
   }
 
   fn set_wallpaper(&self, path: &str) {
-		let mut sanitized_path: String = path.to_owned();
-		if !path.starts_with("file://") {
-			sanitized_path = "file://".to_owned() + path;
-		}
+    let mut sanitized_path: String = path.to_owned();
+    if !path.starts_with("file://") {
+      sanitized_path = "file://".to_owned() + path;
+    }
 
     let result = Command::new("gsettings")
       .arg("set")
