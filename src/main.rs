@@ -7,7 +7,7 @@ mod util;
 
 use chrono::Local;
 use clap::{Parser, Subcommand};
-use log::error;
+use log::{error, info};
 use log4rs::{
   append::{console::ConsoleAppender, file::FileAppender},
   config::{Appender, Logger, Root},
@@ -114,7 +114,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       }
     },
 		Commands::Get => {
-			//
+			let theme = gsettings.get_theme();
+			info!("Current theme spec\n{:?}", theme);
 		}
   }
   Ok(())
