@@ -32,6 +32,7 @@ Usage: theme-manager [OPTIONS] <COMMAND>
 
 Commands:
   set   Sets theme by name or basing on current time
+  get   Retrieves current configuration and prints it to logfile or stdout
   help  Print this message or the help of the given subcommand(s)
 
 Options:
