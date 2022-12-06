@@ -60,9 +60,5 @@ Options:
 
 See [config example](config-example/config.json) for supported fields & options.
 
-**Note**: Path to wallpaper must be prepended with `file://` prefix. `gsettings` (which is used underneath) requires it and I did not write any better validation / automatic prefix prepending yet.
-
-[Tracking issue](https://github.com/kkafar/theme-manager/issues/28)
-
 
 **Note**: `kitty` param in theme specification is optional (rest of them are required) - it is option for setting theme of terminal emulator of my choice.

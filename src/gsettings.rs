@@ -123,11 +123,16 @@ impl Gsettings {
   }
 
   fn set_wallpaper(&self, path: &str) {
+		let mut sanitized_path: String = path.to_owned();
+		if !path.starts_with("file://") {
+			sanitized_path = "file://".to_owned() + path;
+		}
+
     let result = Command::new("gsettings")
       .arg("set")
       .arg("org.cinnamon.desktop.background")
       .arg("picture-uri")
-      .arg(path)
+      .arg(sanitized_path)
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
       .status();
 
