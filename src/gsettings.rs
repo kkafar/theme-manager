@@ -240,12 +240,32 @@ impl Gsettings {
   }
 
   pub fn set_theme(&self, theme: &Theme) {
-    self.set_desktop(&theme.spec.desktop);
-    self.set_mouse(&theme.spec.mouse);
-    self.set_controls(&theme.spec.controls);
-    self.set_icons(&theme.spec.icons);
-    self.set_borders(&theme.spec.borders);
-    self.set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
+		// First we retrieve current theme
+		let current_theme_spec = self.get_theme();
+
+		if current_theme_spec.desktop != theme.spec.desktop {
+			self.set_desktop(&theme.spec.desktop);
+		}
+
+		if current_theme_spec.mouse != theme.spec.mouse {
+			self.set_mouse(&theme.spec.mouse);
+		}
+
+		if current_theme_spec.controls != theme.spec.controls {
+			self.set_controls(&theme.spec.controls);
+		}
+
+		if current_theme_spec.icons != theme.spec.icons {
+			self.set_icons(&theme.spec.icons);
+		}
+
+		if current_theme_spec.borders != theme.spec.borders {
+			self.set_borders(&theme.spec.borders);
+		}
+
+		if current_theme_spec.wallpaper != theme.spec.wallpaper {
+			self.set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
+		}
 
     if let Some(kitty_theme) = &theme.spec.kitty {
       self.set_kitty(kitty_theme);
