@@ -42,6 +42,9 @@ enum Commands {
     /// Name of the theme to apply
     name: Option<String>,
   },
+
+	/// Retrieves current configuration and prints it to logfile or stdout
+	Get,
 }
 
 fn init_logging(cli: &Cli) -> Handle {
@@ -109,7 +112,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       } else {
         error!("Failed to find theme for current time -- not taking any action");
       }
-    }
+    },
+		Commands::Get => {
+			//
+		}
   }
   Ok(())
 }
