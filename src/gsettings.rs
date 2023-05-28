@@ -1,6 +1,9 @@
 use libc::geteuid;
 use log::{debug, error, info};
-use std::{process::{Command, ExitStatus, Stdio, Output}, path::PathBuf};
+use std::{
+  path::PathBuf,
+  process::{Command, ExitStatus, Output, Stdio},
+};
 
 use crate::theme::{Theme, ThemeSpec};
 
@@ -28,17 +31,13 @@ fn handle_result(result: Result<ExitStatus, std::io::Error>, success_msg: String
 }
 
 fn handle_get_result(result: std::io::Result<Output>) -> Result<String, String> {
-	match result {
-		Ok(output) => {
-			match String::from_utf8(output.stdout) {
-				Ok(stdout) => Ok(stdout.replace('\'', "").trim().to_owned()),
-				Err(err) => Err(err.to_string()),
-			}
-		},
-		Err(err) => {
-			Err(err.to_string())
-		}
-	}
+  match result {
+    Ok(output) => match String::from_utf8(output.stdout) {
+      Ok(stdout) => Ok(stdout.replace('\'', "").trim().to_owned()),
+      Err(err) => Err(err.to_string()),
+    },
+    Err(err) => Err(err.to_string()),
+  }
 }
 
 pub struct Gsettings {
@@ -72,17 +71,17 @@ impl Gsettings {
     );
   }
 
-	fn get_desktop(&self) -> Result<String, String> {
+  fn get_desktop(&self) -> Result<String, String> {
     let result = Command::new("gsettings")
       .arg("get")
       .arg("org.cinnamon.theme")
       .arg("name")
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
-			.stdout(Stdio::piped())
+      .stdout(Stdio::piped())
       .output();
 
-		handle_get_result(result)
-	}
+    handle_get_result(result)
+  }
 
   fn set_mouse(&self, theme: &str) {
     let result = Command::new("gsettings")
@@ -100,7 +99,7 @@ impl Gsettings {
     );
   }
 
-	fn get_mouse(&self) -> Result<String, String> {
+  fn get_mouse(&self) -> Result<String, String> {
     let result = Command::new("gsettings")
       .arg("get")
       .arg("org.cinnamon.desktop.interface")
@@ -108,8 +107,8 @@ impl Gsettings {
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
       .output();
 
-		handle_get_result(result)
-	}
+    handle_get_result(result)
+  }
 
   fn set_controls(&self, theme: &str) {
     let result = Command::new("gsettings")
@@ -127,7 +126,7 @@ impl Gsettings {
     );
   }
 
-	fn get_controls(&self) -> Result<String, String> {
+  fn get_controls(&self) -> Result<String, String> {
     let result = Command::new("gsettings")
       .arg("get")
       .arg("org.cinnamon.desktop.interface")
@@ -135,8 +134,8 @@ impl Gsettings {
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
       .output();
 
-		handle_get_result(result)
-	}
+    handle_get_result(result)
+  }
 
   fn set_icons(&self, theme: &str) {
     let result = Command::new("gsettings")
@@ -154,7 +153,7 @@ impl Gsettings {
     );
   }
 
-	fn get_icons(&self) -> Result<String, String> {
+  fn get_icons(&self) -> Result<String, String> {
     let result = Command::new("gsettings")
       .arg("get")
       .arg("org.cinnamon.desktop.interface")
@@ -162,8 +161,8 @@ impl Gsettings {
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
       .output();
 
-		handle_get_result(result)
-	}
+    handle_get_result(result)
+  }
 
   fn set_borders(&self, theme: &str) {
     let result = Command::new("gsettings")
@@ -181,7 +180,7 @@ impl Gsettings {
     );
   }
 
-	fn get_borders(&self) -> Result<String, String> {
+  fn get_borders(&self) -> Result<String, String> {
     let result = Command::new("gsettings")
       .arg("get")
       .arg("org.cinnamon.desktop.wm.preferences")
@@ -189,8 +188,8 @@ impl Gsettings {
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
       .output();
 
-		handle_get_result(result)
-	}
+    handle_get_result(result)
+  }
 
   fn set_wallpaper(&self, path: &str) {
     let mut sanitized_path: String = path.to_owned();
@@ -213,7 +212,7 @@ impl Gsettings {
     );
   }
 
-	fn get_wallpaper(&self) -> Result<String, String> {
+  fn get_wallpaper(&self) -> Result<String, String> {
     let result = Command::new("gsettings")
       .arg("get")
       .arg("org.cinnamon.desktop.background")
@@ -221,8 +220,8 @@ impl Gsettings {
       .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
       .output();
 
-		handle_get_result(result)
-	}
+    handle_get_result(result)
+  }
 
   fn set_kitty(&self, theme: &str) {
     let result = Command::new("kitty")
@@ -239,55 +238,73 @@ impl Gsettings {
     );
   }
 
+  fn get_kitty(&self) -> Result<String, String> {
+    let result = Command::new("kitty")
+      .arg("+kitten")
+      .arg("themes")
+      .arg("--dump-theme")
+      .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+      .output();
+
+    handle_get_result(result)
+  }
+
   pub fn set_theme(&self, theme: &Theme) {
-		// First we retrieve current theme
-		let current_theme_spec = self.get_theme();
+    // First we retrieve current theme
+    let current_theme_spec = self.get_theme();
 
-		if current_theme_spec.desktop != theme.spec.desktop {
-			self.set_desktop(&theme.spec.desktop);
-		}
+    if current_theme_spec.desktop != theme.spec.desktop {
+      self.set_desktop(&theme.spec.desktop);
+    }
 
-		if current_theme_spec.mouse != theme.spec.mouse {
-			self.set_mouse(&theme.spec.mouse);
-		}
+    if current_theme_spec.mouse != theme.spec.mouse {
+      self.set_mouse(&theme.spec.mouse);
+    }
 
-		if current_theme_spec.controls != theme.spec.controls {
-			self.set_controls(&theme.spec.controls);
-		}
+    if current_theme_spec.controls != theme.spec.controls {
+      self.set_controls(&theme.spec.controls);
+    }
 
-		if current_theme_spec.icons != theme.spec.icons {
-			self.set_icons(&theme.spec.icons);
-		}
+    if current_theme_spec.icons != theme.spec.icons {
+      self.set_icons(&theme.spec.icons);
+    }
 
-		if current_theme_spec.borders != theme.spec.borders {
-			self.set_borders(&theme.spec.borders);
-		}
+    if current_theme_spec.borders != theme.spec.borders {
+      self.set_borders(&theme.spec.borders);
+    }
 
-		if current_theme_spec.wallpaper != theme.spec.wallpaper {
-			self.set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
-		}
+    if current_theme_spec.wallpaper != theme.spec.wallpaper {
+      self.set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
+    }
 
     if let Some(kitty_theme) = &theme.spec.kitty {
-      self.set_kitty(kitty_theme);
+      if let Some(crt_kitty_theme) = current_theme_spec.kitty {
+        if crt_kitty_theme != *kitty_theme {
+          self.set_kitty(kitty_theme);
+        }
+      } else {
+        self.set_kitty(kitty_theme);
+      }
     }
   }
 
-	pub fn get_theme(&self) -> ThemeSpec {
+  pub fn get_theme(&self) -> ThemeSpec {
     let desktop = self.get_desktop().unwrap_or_else(|err| err);
     let mouse = self.get_mouse().unwrap_or_else(|err| err);
     let controls = self.get_controls().unwrap_or_else(|err| err);
     let icons = self.get_icons().unwrap_or_else(|err| err);
     let borders = self.get_borders().unwrap_or_else(|err| err);
     let wallpaper = PathBuf::from(self.get_wallpaper().unwrap_or_else(|err| err));
+    let kitty_theme = self.get_kitty().unwrap_or_else(|err| err);
 
-		ThemeSpec {
-			desktop,
-			mouse,
-			controls,
-			icons,
-			borders,
-			wallpaper,
-			kitty: Some("<Unsupported>".to_owned()),
-		}
-	}
+    ThemeSpec {
+      desktop,
+      mouse,
+      controls,
+      icons,
+      borders,
+      wallpaper,
+      kitty: Some(kitty_theme),
+    }
+  }
 }

@@ -43,8 +43,8 @@ enum Commands {
     name: Option<String>,
   },
 
-	/// Retrieves current configuration and prints it to logfile or stdout
-	Get,
+  /// Retrieves current configuration and prints it to logfile or stdout
+  Get,
 }
 
 fn init_logging(cli: &Cli) -> Handle {
@@ -112,11 +112,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       } else {
         error!("Failed to find theme for current time -- not taking any action");
       }
-    },
-		Commands::Get => {
-			let theme = gsettings.get_theme();
-			info!("Current theme spec\n{:?}", theme);
-		}
+    }
+    Commands::Get => {
+      let theme = gsettings.get_theme();
+      info!("Current theme spec\n{:?}", theme);
+    }
   }
   Ok(())
 }
