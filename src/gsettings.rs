@@ -278,7 +278,13 @@ impl Gsettings {
     }
 
     if let Some(kitty_theme) = &theme.spec.kitty {
-      self.set_kitty(kitty_theme);
+      if let Some(crt_kitty_theme) = current_theme_spec.kitty {
+        if crt_kitty_theme != *kitty_theme {
+          self.set_kitty(kitty_theme);
+        }
+      } else {
+        self.set_kitty(kitty_theme);
+      }
     }
   }
 
