@@ -297,6 +297,8 @@ impl Gsettings {
     let wallpaper = PathBuf::from(self.get_wallpaper().unwrap_or_else(|err| err));
     let kitty_theme = self.get_kitty().unwrap_or_else(|err| err);
 
+    debug!("Resolved kitty theme: {}", &kitty_theme);
+
     ThemeSpec {
       desktop,
       mouse,
