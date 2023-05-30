@@ -74,7 +74,7 @@ fn init_logging(cli: &Cli) -> Handle {
         .additive(false)
         .build("mainlog", log::LevelFilter::Info),
     )
-    .build(Root::builder().appender("main").build(log::LevelFilter::Info))
+    .build(Root::builder().appender("main").build(log::LevelFilter::Debug))
     .unwrap();
 
   log4rs::init_config(config).unwrap()
