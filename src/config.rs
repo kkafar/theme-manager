@@ -77,13 +77,11 @@ impl TryFrom<PathBuf> for Config {
 
 pub fn default_path() -> Option<PathBuf> {
     // We look for $HOME/.config/theme-manager/config.json file
-    if let Ok(home_path) = std::env::var("HOME") {
-        let default_config = PathBuf::from(home_path)
-            .join(".config")
-            .join("theme-manager")
-            .join("config.json");
-        if default_config.is_file() {
-            return Some(default_config);
+    if let Some(user_config_dir) = dirs::config_dir() {
+        let app_config_path = user_config_dir.join("theme-manager").join("config.json");
+
+        if app_config_path.is_file() {
+            return Some(app_config_path);
         }
     }
     None
