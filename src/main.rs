@@ -5,18 +5,14 @@ mod gsettings;
 mod handlers;
 mod theme;
 mod util;
+mod logging;
 
 use chrono::Local;
 use clap::{Parser, Subcommand};
 use config::default_path;
 use handlers::handle_edit_cmd;
 use log::{error, info, trace, warn};
-use log4rs::{
-    append::{console::ConsoleAppender, file::FileAppender},
-    config::{Appender, Logger, Root},
-    encode::pattern::PatternEncoder,
-    Handle,
-};
+
 use std::{borrow::Borrow, path::PathBuf};
 
 #[derive(Parser, Debug)]
@@ -51,52 +47,18 @@ enum Commands {
 
     /// Opens config file in a editor allowing for modification
     Edit {
-        // Path do editor binary. It will be called in a following way:
-        // editor PATH_TO_CONFIG_FILE
-        // If not specified $EDITOR env var will be used. If that is not defined the operation is a
-        // noop.
+        /// Path do editor binary. It will be called in a following way:
+        /// editor PATH_TO_CONFIG_FILE
+        /// If not specified $EDITOR env var will be used. If that is not defined the operation is a
+        /// noop.
         editor: Option<String>,
     },
-}
-
-fn init_logging(cli: &Cli) -> Handle {
-    let log_pattern = String::from("[{d(%Y-%m-%d %H:%M:%S)}] [{l}] {m}{n}");
-
-    let mut config_builder = log4rs::Config::builder();
-
-    if let Some(file) = &cli.log_file {
-        let file_appender = FileAppender::builder()
-            .encoder(Box::new(PatternEncoder::new(&log_pattern)))
-            .build(file)
-            .unwrap();
-
-        config_builder = config_builder.appender(Appender::builder().build("main", Box::new(file_appender)));
-    } else {
-        let stdout_appender = ConsoleAppender::builder()
-            .encoder(Box::new(PatternEncoder::new(&log_pattern)))
-            .build();
-
-        config_builder =
-            config_builder.appender(Appender::builder().build("main", Box::new(stdout_appender)));
-    }
-
-    let config = config_builder
-        .logger(
-            Logger::builder()
-                .appender("main")
-                .additive(false)
-                .build("mainlog", log::LevelFilter::Info),
-        )
-        .build(Root::builder().appender("main").build(log::LevelFilter::Info))
-        .unwrap();
-
-    log4rs::init_config(config).unwrap()
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
-    let _log_handle = init_logging(&cli);
+    let _log_handle = logging::init_logging(&cli);
 
     let config = match config::load_config(&cli) {
         Ok(config) => config,
