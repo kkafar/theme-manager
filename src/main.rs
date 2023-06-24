@@ -8,6 +8,8 @@ mod util;
 
 use chrono::Local;
 use clap::{Parser, Subcommand};
+use config::default_path;
+use handlers::handle_edit_cmd;
 use log::{error, info};
 use log4rs::{
     append::{console::ConsoleAppender, file::FileAppender},
@@ -15,7 +17,7 @@ use log4rs::{
     encode::pattern::PatternEncoder,
     Handle,
 };
-use std::{os, path::PathBuf};
+use std::{borrow::Borrow, os, path::PathBuf};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
@@ -129,7 +131,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             info!("Current theme spec\n{:?}", theme);
         }
         Commands::Edit { editor } => {
-            if let Some(editor_name) = editor {
+            if let Some(ref editor_name) = editor {
+                let config_path = if let Some(ref path) = cli.config {
+                    path.clone()
+                } else if let Some(ref path) = default_path() {
+                    path.clone()
+                } else {
+                    return Ok(());
+                };
+                handle_edit_cmd(editor_name, config_path.borrow());
             } else if let Ok(editor_name) = std::env::var("EDITOR") {
             } else {
             }
