@@ -1,64 +1,83 @@
-use std::{path::Path, process::Command, borrow::Borrow};
+use std::{borrow::Borrow, path::{Path, PathBuf}, process::Command};
 
 use chrono::Local;
-use log::{info, warn, error, trace};
+use log::{error, info, trace, warn};
 
-use crate::{command::Commands, cli::Args, gsettings, config::Config};
+use crate::{
+    cli::Args,
+    command::Commands,
+    config::Config,
+    gsettings::Gsettings,
+};
 
-pub fn handle_cmd(args: Args, config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    let gsettings = gsettings::Gsettings::new();
+pub fn handle_cmd(args: Args, cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
+    let gsettings = Gsettings::new();
     match args.command {
-        Commands::Set { name } => {
-            // First we check whether user specified a concrete theme
-            // If no concrete theme was specified we look for theme assigned to current time
-            // If no such theme is found we log error and exit gracefully
-            if let Some(name) = name {
-                // If so, we check wheter theme of given name is present in config file
-                // In case such theme does not exist we print error and exit gracefully
-                if let Some(theme) = config.theme_for_name(&name) {
-                    gsettings.set_theme(theme)
-                } else {
-                    error!("Failed to find theme for given name: {}", name);
-                }
-            } else if let Some(theme) = config.theme_for_time(Local::now()) {
-                gsettings.set_theme(theme);
-            } else {
-                error!("Failed to find theme for current time -- not taking any action");
-            }
-        },
-        Commands::Get => {
-            let theme = gsettings.get_theme();
-            info!("Current theme spec\n{:?}", theme);
-        },
-        Commands::Edit { editor } => {
-            info!("Running Edit command");
-
-            trace!("Resolving config path");
-            let config_path = if let Some(ref path) = args.config {
-                path.clone()
-            } else if let Some(ref path) = crate::config::default_path() {
-                path.clone()
-            } else {
-                warn!("Failed to resolve config path");
-                return Ok(());
-            };
-
-            trace!("Resolving editor name");
-            if let Some(ref editor_name) = editor {
-                handle_edit_cmd(editor_name, config_path.borrow());
-            } else if let Ok(editor_name) = std::env::var("EDITOR") {
-                handle_edit_cmd(editor_name.borrow(), config_path.borrow());
-            } else {
-                warn!("Failed to resolve editor name");
-                return Ok(());
-            }
-        }
+        Commands::Set { name } => handle_set_cmd(name, cfg, &gsettings),
+        Commands::Get => handle_get_cmd(&gsettings),
+        Commands::Edit { editor } => handle_edit_cmd(editor, args.config),
     }
     Ok(())
 }
 
-pub fn handle_edit_cmd(editor: &str, config_path: &Path) {
-    info!("Handling edit cmd with editor: {} for config: {}", editor, config_path.to_owned().to_str().unwrap_or("Failed to parse config path"));
+fn handle_set_cmd(theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
+    info!("Running Set command");
+    // First we check whether user specified a concrete theme
+    // If no concrete theme was specified we look for theme assigned to current time
+    // If no such theme is found we log error and exit gracefully
+    if let Some(name) = theme_name {
+        // If so, we check wheter theme of given name is present in config file
+        // In case such theme does not exist we print error and exit gracefully
+        if let Some(theme) = cfg.theme_for_name(&name) {
+            gset.set_theme(theme)
+        } else {
+            error!("Failed to find theme for given name: {}", name);
+        }
+    } else if let Some(theme) = cfg.theme_for_time(Local::now()) {
+        gset.set_theme(theme);
+    } else {
+        error!("Failed to find theme for current time -- not taking any action");
+    }
+}
+
+fn handle_get_cmd(gset: &Gsettings) {
+    info!("Running Get command");
+    let theme = gset.get_theme();
+    info!("Current theme spec\n{:?}", theme);
+}
+
+fn handle_edit_cmd(editor: Option<String>, cli_cfg_path: Option<PathBuf>) {
+    info!("Running Edit command");
+
+    trace!("Resolving config path");
+    let config_path = if let Some(ref path) = cli_cfg_path {
+        path.clone()
+    } else if let Some(ref path) = crate::config::default_path() {
+        path.clone()
+    } else {
+        warn!("Failed to resolve config path");
+        return;
+    };
+
+    trace!("Resolving editor name");
+    if let Some(ref editor_name) = editor {
+        open_editor(editor_name, config_path.borrow());
+    } else if let Ok(editor_name) = std::env::var("EDITOR") {
+        open_editor(editor_name.borrow(), config_path.borrow());
+    } else {
+        warn!("Failed to resolve editor name");
+    }
+}
+
+fn open_editor(editor: &str, config_path: &Path) {
+    info!(
+        "Handling edit cmd with editor: {} for config: {}",
+        editor,
+        config_path
+            .to_owned()
+            .to_str()
+            .unwrap_or("Failed to parse config path")
+    );
     if editor.is_empty() {
         warn!("Handling interrupted due to empty editor path");
         return;
@@ -69,9 +88,12 @@ pub fn handle_edit_cmd(editor: &str, config_path: &Path) {
             if status.success() {
                 info!("Editor closed properly with status code 0");
             } else {
-                warn!("Editor closed with error status code {} (-1 means unknown)", status.code().unwrap_or(-1));
+                warn!(
+                    "Editor closed with error status code {} (-1 means unknown)",
+                    status.code().unwrap_or(-1)
+                );
             }
-        },
+        }
         Err(err) => {
             warn!("Failed to open the editor, reported error: {}", err);
         }
