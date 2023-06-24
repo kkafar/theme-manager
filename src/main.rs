@@ -3,16 +3,16 @@
 mod cli;
 mod command;
 mod config;
+mod constant;
+mod context;
 mod gsettings;
 mod handlers;
 mod logging;
 mod theme;
 mod util;
-mod constant;
-mod context;
 
 use clap::Parser;
-use context::{Context, data::DataRepo};
+use context::{data::DataRepo, Context};
 use handlers::handle_cmd;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

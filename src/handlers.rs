@@ -12,28 +12,17 @@ use crate::{cli::Args, command::Commands, config::Config, context::Context, gset
 pub fn handle_cmd(ctx: &mut Context, args: Args, cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
     let gsettings = Gsettings::new();
     match args.command {
-        Commands::Set { name, lock, unlock } => handle_set_cmd(ctx, name, lock, unlock, cfg, &gsettings),
+        Commands::Set { name } => handle_set_cmd(ctx, name, cfg, &gsettings),
         Commands::Get => handle_get_cmd(ctx, &gsettings),
         Commands::Edit { editor } => handle_edit_cmd(ctx, editor, args.config),
+        Commands::Lock => handle_lock_cmd(ctx),
+        Commands::Unlock => handle_unlock_cmd(ctx),
     }
     Ok(())
 }
 
-fn handle_set_cmd(
-    ctx: &mut Context,
-    theme_name: Option<String>,
-    lock_theme: bool,
-    unlock_theme: bool,
-    cfg: Config,
-    gset: &Gsettings,
-) {
+fn handle_set_cmd(ctx: &mut Context, theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
     info!("Running Set command");
-
-    if is_theme_locked(ctx) {
-        info!("Theme is locked. Do not performing any changes");
-        return;
-    }
-
 
     // First we check whether user specified a concrete theme
     // If no concrete theme was specified we look for theme assigned to current time
@@ -43,13 +32,15 @@ fn handle_set_cmd(
         // In case such theme does not exist we print error and exit gracefully
         if let Some(theme) = cfg.theme_for_name(&name) {
             gset.set_theme(theme);
-            maybe_lock_or_unlock(ctx, name.borrow(), lock_theme, unlock_theme)
         } else {
             error!("Failed to find theme for given name: {}", name);
         }
     } else if let Some(theme) = cfg.theme_for_time(Local::now()) {
-        gset.set_theme(theme);
-        maybe_lock_or_unlock(ctx, theme.name.borrow(), lock_theme, unlock_theme)
+        if !is_theme_locked(ctx) {
+            gset.set_theme(theme);
+        } else {
+            info!("Theme is locked. Do not performing any changes");
+        }
     } else {
         error!("Failed to find theme for current time -- not taking any action");
     }
@@ -113,6 +104,14 @@ fn open_editor(editor: &str, config_path: &Path) {
             warn!("Failed to open the editor, reported error: {}", err);
         }
     }
+}
+
+fn handle_lock_cmd(ctx: &mut Context) {
+    maybe_lock_or_unlock(ctx, "unsupported", true, false);
+}
+
+fn handle_unlock_cmd(ctx: &mut Context) {
+    maybe_lock_or_unlock(ctx, "unsupported", false, true);
 }
 
 fn maybe_lock_or_unlock(ctx: &mut Context, theme: &str, lock: bool, unlock: bool) {

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use log::{error, warn, info, trace, debug};
+use log::{debug, error, info, trace, warn};
 
 use crate::constant::ConstantRepo;
 
@@ -65,7 +65,7 @@ impl DataRepo {
                     error!("Failed to remove theme lock with error {}", err);
                     Err(err)
                 }
-            }
+            };
         }
         Ok(())
     }

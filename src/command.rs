@@ -6,15 +6,6 @@ pub enum Commands {
     Set {
         /// Name of the theme to apply
         name: Option<String>,
-
-        /// Whether to disable automatic theme switching.
-        /// This option takes priority over --unlock option.
-        #[arg(long, default_value_t = false)]
-        lock: bool,
-
-        /// Whether to enable automatic theme switching
-        #[arg(long, default_value_t = false)]
-        unlock: bool,
     },
 
     /// Retrieves current configuration and prints it to logfile or stdout
@@ -28,4 +19,10 @@ pub enum Commands {
         /// noop.
         editor: Option<String>,
     },
+
+    /// Locks current theme, so that auto-selection does not apply any change
+    Lock,
+
+    /// Removes theme lock so that auto-selection does work again
+    Unlock,
 }
