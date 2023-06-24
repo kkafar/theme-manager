@@ -19,6 +19,10 @@ pub struct Args {
     #[arg(long, value_name = "FILE")]
     pub log_file: Option<PathBuf>,
 
+    /// Log level to run the program with. Available: trace, info, warn, error
+    #[arg(long, default_value_t = String::from("info"))]
+    pub log_level: String,
+
     #[command(subcommand)]
     pub command: Commands,
 }
