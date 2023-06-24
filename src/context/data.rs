@@ -14,11 +14,8 @@ impl DataRepo {
         let default_data_dir = DataRepo::default_data_dir().unwrap();
         if !default_data_dir.is_dir() {
             warn!("Data directory at {default_data_dir:?} is missing. Attempting to create.");
-            match std::fs::create_dir_all(&default_data_dir) {
-                Err(err) => {
-                    error!("Failed to create data directory at {default_data_dir:?}. Reported error: {err}");
-                }
-                _ => {}
+            if let Err(err) = std::fs::create_dir_all(&default_data_dir) {
+                error!("Failed to create data directory at {default_data_dir:?}. Reported error: {err}");
             }
         }
 
