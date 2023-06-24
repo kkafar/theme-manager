@@ -4,7 +4,7 @@ use self::data::DataRepo;
 pub mod data;
 
 pub struct Context {
-    data: DataRepo,
+    pub data: DataRepo,
 }
 
 impl Context {
