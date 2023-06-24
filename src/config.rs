@@ -89,9 +89,9 @@ pub fn default_path() -> Option<PathBuf> {
     None
 }
 
-pub fn load_config(cli: &crate::Cli) -> Result<Config> {
+pub fn load_config(args: &crate::cli::Args) -> Result<Config> {
     // First we check wheter user specified path to a config
-    if let Some(config_path) = cli.config.clone() {
+    if let Some(config_path) = args.config.clone() {
         match Config::try_from(config_path) {
             Ok(config) => return Ok(config),
             Err(config_err) => {
