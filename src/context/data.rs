@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use log::{error, warn};
+use log::{error, warn, info, trace};
 
 use crate::constant::ConstantRepo;
 
@@ -32,7 +32,8 @@ impl DataRepo {
         Some(dirs::data_dir().unwrap().join(ConstantRepo::app_name()))
     }
 
-    pub fn lock_theme(&mut self, _theme: &str) -> std::io::Result<()> {
+    pub fn lock_theme(&self, _theme: &str) -> std::io::Result<()> {
+        trace!("Creating theme lock");
         if self.theme_lock_file.is_file() {
             return Ok(());
         }
@@ -48,7 +49,18 @@ impl DataRepo {
         }
     }
 
-    pub fn unlock_theme(&mut self) {}
+    pub fn unlock_theme(&self) {
+        trace!("Removing theme lock");
+
+        if self.theme_lock_file.is_file() {
+            match std::fs::remove_file(&self.theme_lock_file) {
+                Ok(_) => info!("Theme lock removed"),
+                Err(err) => {
+                    error!("Failed to remove theme lock with error {}", err);
+                }
+            }
+        }
+    }
 }
 
 impl Default for DataRepo {
