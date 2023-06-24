@@ -10,7 +10,7 @@ use chrono::Local;
 use clap::{Parser, Subcommand};
 use config::default_path;
 use handlers::handle_edit_cmd;
-use log::{error, info};
+use log::{error, info, trace, warn};
 use log4rs::{
     append::{console::ConsoleAppender, file::FileAppender},
     config::{Appender, Logger, Root},
@@ -131,17 +131,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             info!("Current theme spec\n{:?}", theme);
         }
         Commands::Edit { editor } => {
+            info!("Running Edit command");
+
+            trace!("Resolving config path");
+            let config_path = if let Some(ref path) = cli.config {
+                path.clone()
+            } else if let Some(ref path) = default_path() {
+                path.clone()
+            } else {
+                warn!("Failed to resolve config path");
+                return Ok(());
+            };
+
+            trace!("Resolving editor name");
             if let Some(ref editor_name) = editor {
-                let config_path = if let Some(ref path) = cli.config {
-                    path.clone()
-                } else if let Some(ref path) = default_path() {
-                    path.clone()
-                } else {
-                    return Ok(());
-                };
                 handle_edit_cmd(editor_name, config_path.borrow());
             } else if let Ok(editor_name) = std::env::var("EDITOR") {
+                handle_edit_cmd(editor_name.borrow(), config_path.borrow());
             } else {
+                warn!("Failed to resolve editor name");
+                return Ok(());
             }
         }
     }
