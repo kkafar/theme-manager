@@ -12,6 +12,7 @@ Simplified CLI for theme management for Linux Mint Cinnamon.
 [dependencies]
 chrono = "0.4.23"
 clap = { version = "4.0.25", features = ["derive"] }
+dirs = "5.0.1"
 itertools = "0.10.5"
 libc = "0.2.137"
 log = "0.4.17"
