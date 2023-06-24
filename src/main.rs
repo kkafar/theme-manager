@@ -12,12 +12,7 @@ use clap::{Parser, Subcommand};
 use config::default_path;
 use handlers::handle_edit_cmd;
 use log::{error, info, trace, warn};
-use log4rs::{
-    append::{console::ConsoleAppender, file::FileAppender},
-    config::{Appender, Logger, Root},
-    encode::pattern::PatternEncoder,
-    Handle,
-};
+
 use std::{borrow::Borrow, path::PathBuf};
 
 #[derive(Parser, Debug)]
