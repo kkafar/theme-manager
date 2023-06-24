@@ -3,7 +3,7 @@ use std::{path::Path, process::Command};
 use log::{info, warn};
 
 pub fn handle_edit_cmd(editor: &str, config_path: &Path) {
-    info!("Handling edit cmd with editor: {} for config: {}", editor, config_path.clone().to_str().unwrap_or("Failed to parse config path"));
+    info!("Handling edit cmd with editor: {} for config: {}", editor, config_path.to_owned().to_str().unwrap_or("Failed to parse config path"));
     if editor.is_empty() {
         warn!("Handling interrupted due to empty editor path");
         return;
