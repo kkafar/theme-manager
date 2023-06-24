@@ -17,7 +17,7 @@ use log4rs::{
     encode::pattern::PatternEncoder,
     Handle,
 };
-use std::{borrow::Borrow, os, path::PathBuf};
+use std::{borrow::Borrow, path::PathBuf};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
