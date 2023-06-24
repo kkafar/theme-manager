@@ -1,8 +1,8 @@
 use log4rs::{Handle, append::{file::FileAppender, console::ConsoleAppender}, encode::pattern::PatternEncoder, config::{Appender, Root, Logger}};
 
-use crate::Cli;
+use crate::cli::Args;
 
-pub fn init_logging(cli: &Cli) -> Handle {
+pub fn init_logging(cli: &Args) -> Handle {
     let log_pattern = String::from("[{d(%Y-%m-%d %H:%M:%S)}] [{l}] {m}{n}");
 
     let mut config_builder = log4rs::Config::builder();
