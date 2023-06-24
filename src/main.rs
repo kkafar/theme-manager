@@ -8,8 +8,11 @@ mod handlers;
 mod logging;
 mod theme;
 mod util;
+mod constant;
+mod context;
 
 use clap::Parser;
+use context::{Context, data::DataRepo};
 use handlers::handle_cmd;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,5 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err(Box::new(err));
         }
     };
-    handle_cmd(cli_args, config)
+
+    let mut ctx = Context::new(DataRepo::default());
+    handle_cmd(&mut ctx, cli_args, config)
 }
