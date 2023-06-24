@@ -29,12 +29,6 @@ fn handle_set_cmd(
 ) {
     info!("Running Set command");
 
-    if is_theme_locked(ctx) {
-        info!("Theme is locked. Do not performing any changes");
-        return;
-    }
-
-
     // First we check whether user specified a concrete theme
     // If no concrete theme was specified we look for theme assigned to current time
     // If no such theme is found we log error and exit gracefully
@@ -48,7 +42,11 @@ fn handle_set_cmd(
             error!("Failed to find theme for given name: {}", name);
         }
     } else if let Some(theme) = cfg.theme_for_time(Local::now()) {
-        gset.set_theme(theme);
+        if !is_theme_locked(ctx) {
+            gset.set_theme(theme);
+        } else {
+            info!("Theme is locked. Do not performing any changes");
+        }
         maybe_lock_or_unlock(ctx, theme.name.borrow(), lock_theme, unlock_theme)
     } else {
         error!("Failed to find theme for current time -- not taking any action");
