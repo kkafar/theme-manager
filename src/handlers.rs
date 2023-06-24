@@ -28,6 +28,13 @@ fn handle_set_cmd(
     gset: &Gsettings,
 ) {
     info!("Running Set command");
+
+    if is_theme_locked(ctx) {
+        info!("Theme is locked. Do not performing any changes");
+        return;
+    }
+
+
     // First we check whether user specified a concrete theme
     // If no concrete theme was specified we look for theme assigned to current time
     // If no such theme is found we log error and exit gracefully
@@ -110,8 +117,12 @@ fn open_editor(editor: &str, config_path: &Path) {
 
 fn maybe_lock_or_unlock(ctx: &mut Context, theme: &str, lock: bool, unlock: bool) {
     if lock {
-        ctx.data.lock_theme(theme);
+        let _ = ctx.data.lock_theme(theme);
     } else if unlock {
-        ctx.data.unlock_theme();
+        let _ = ctx.data.unlock_theme();
     }
+}
+
+fn is_theme_locked(ctx: &mut Context) -> bool {
+    ctx.data.theme_lock_file.is_file()
 }

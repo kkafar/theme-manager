@@ -6,7 +6,7 @@ use crate::constant::ConstantRepo;
 
 pub struct DataRepo {
     pub app_data_dir: PathBuf,
-    theme_lock_file: PathBuf,
+    pub theme_lock_file: PathBuf,
 }
 
 impl DataRepo {
@@ -49,17 +49,22 @@ impl DataRepo {
         }
     }
 
-    pub fn unlock_theme(&self) {
+    pub fn unlock_theme(&self) -> std::io::Result<()> {
         trace!("Removing theme lock");
 
         if self.theme_lock_file.is_file() {
-            match std::fs::remove_file(&self.theme_lock_file) {
-                Ok(_) => info!("Theme lock removed"),
+            return match std::fs::remove_file(&self.theme_lock_file) {
+                Ok(_) => {
+                    info!("Theme lock removed");
+                    Ok(())
+                }
                 Err(err) => {
                     error!("Failed to remove theme lock with error {}", err);
+                    Err(err)
                 }
             }
         }
+        Ok(())
     }
 }
 
