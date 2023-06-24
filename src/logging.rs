@@ -7,8 +7,8 @@ use log4rs::{
 
 use crate::cli::Args;
 
-fn log_level_from_string(level: &String) -> log::LevelFilter {
-    match level.as_str() {
+fn log_level_from_string(level: &str) -> log::LevelFilter {
+    match level {
         "trace" => log::LevelFilter::Trace,
         "info" => log::LevelFilter::Info,
         "warn" => log::LevelFilter::Warn,
