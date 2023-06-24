@@ -9,7 +9,10 @@ use std::{
 use log::{error, info};
 use serde::Deserialize;
 
-use crate::{theme::{Theme, TimeSpec}, constant::ConstantRepo};
+use crate::{
+    constant::ConstantRepo,
+    theme::{Theme, TimeSpec},
+};
 
 pub type Result<T> = std::result::Result<T, ConfigError>;
 

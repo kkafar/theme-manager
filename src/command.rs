@@ -19,7 +19,7 @@ pub enum Commands {
         /// noop.
         editor: Option<String>,
     },
-    
+
     /// Locks current theme, so that auto-selection does not apply any change
     Lock,
 

@@ -21,12 +21,7 @@ pub fn handle_cmd(ctx: &mut Context, args: Args, cfg: Config) -> Result<(), Box<
     Ok(())
 }
 
-fn handle_set_cmd(
-    ctx: &mut Context,
-    theme_name: Option<String>,
-    cfg: Config,
-    gset: &Gsettings,
-) {
+fn handle_set_cmd(ctx: &mut Context, theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
     info!("Running Set command");
 
     // First we check whether user specified a concrete theme
@@ -118,7 +113,6 @@ fn handle_lock_cmd(ctx: &mut Context) {
 fn handle_unlock_cmd(ctx: &mut Context) {
     maybe_lock_or_unlock(ctx, "unsupported", false, true);
 }
-
 
 fn maybe_lock_or_unlock(ctx: &mut Context, theme: &str, lock: bool, unlock: bool) {
     if lock {

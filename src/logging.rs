@@ -1,4 +1,9 @@
-use log4rs::{Handle, append::{file::FileAppender, console::ConsoleAppender}, encode::pattern::PatternEncoder, config::{Appender, Root, Logger}};
+use log4rs::{
+    append::{console::ConsoleAppender, file::FileAppender},
+    config::{Appender, Logger, Root},
+    encode::pattern::PatternEncoder,
+    Handle,
+};
 
 use crate::cli::Args;
 
@@ -35,4 +40,3 @@ pub fn init_logging(cli: &Args) -> Handle {
 
     log4rs::init_config(config).unwrap()
 }
-
