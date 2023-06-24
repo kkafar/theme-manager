@@ -117,6 +117,7 @@ fn open_editor(editor: &str, config_path: &Path) {
 
 fn maybe_lock_or_unlock(ctx: &mut Context, theme: &str, lock: bool, unlock: bool) {
     if lock {
+        info!("LOCKING");
         let _ = ctx.data.lock_theme(theme);
     } else if unlock {
         let _ = ctx.data.unlock_theme();

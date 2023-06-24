@@ -30,7 +30,7 @@ pub fn init_logging(cli: &Args) -> Handle {
                 .additive(false)
                 .build("mainlog", log::LevelFilter::Info),
         )
-        .build(Root::builder().appender("main").build(log::LevelFilter::Info))
+        .build(Root::builder().appender("main").build(log::LevelFilter::Trace))
         .unwrap();
 
     log4rs::init_config(config).unwrap()

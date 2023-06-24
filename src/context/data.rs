@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use log::{error, warn, info, trace};
+use log::{error, warn, info, trace, debug};
 
 use crate::constant::ConstantRepo;
 
@@ -11,17 +11,20 @@ pub struct DataRepo {
 
 impl DataRepo {
     pub fn new() -> Self {
-        let default_data_dir = DataRepo::default_data_dir().unwrap();
-        if !default_data_dir.is_dir() {
-            warn!("Data directory at {default_data_dir:?} is missing. Attempting to create.");
-            if let Err(err) = std::fs::create_dir_all(&default_data_dir) {
-                error!("Failed to create data directory at {default_data_dir:?}. Reported error: {err}");
+        let app_data_dir = DataRepo::default_data_dir().unwrap();
+        if !app_data_dir.is_dir() {
+            warn!("Data directory at {app_data_dir:?} is missing. Attempting to create.");
+            if let Err(err) = std::fs::create_dir_all(&app_data_dir) {
+                error!("Failed to create data directory at {app_data_dir:?}. Reported error: {err}");
             }
         }
 
+        let theme_lock_file = app_data_dir.join("theme.lock");
+        debug!("DataRepo data_dir: {app_data_dir:?}, theme_lock_file: {theme_lock_file:?}");
+
         Self {
-            app_data_dir: default_data_dir.clone(),
-            theme_lock_file: default_data_dir.join("theme.lock"),
+            app_data_dir,
+            theme_lock_file,
         }
     }
 
@@ -36,13 +39,16 @@ impl DataRepo {
         }
 
         match std::fs::File::options()
-            .read(false)
-            .write(false)
+            .read(true)
+            .write(true)
             .create(true)
             .open(&self.theme_lock_file)
         {
             Ok(_) => Ok(()),
-            Err(err) => Err(err)
+            Err(err) => {
+                error!("Failed to create theme lock file. Error: {}", err);
+                Err(err)
+            }
         }
     }
 
