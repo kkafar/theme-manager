@@ -1,26 +1,32 @@
-use std::{borrow::Borrow, path::{Path, PathBuf}, process::Command};
+use std::{
+    borrow::Borrow,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use chrono::Local;
 use log::{error, info, trace, warn};
 
-use crate::{
-    cli::Args,
-    command::Commands,
-    config::Config,
-    gsettings::Gsettings, context::Context,
-};
+use crate::{cli::Args, command::Commands, config::Config, context::Context, gsettings::Gsettings};
 
 pub fn handle_cmd(ctx: &mut Context, args: Args, cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
     let gsettings = Gsettings::new();
     match args.command {
-        Commands::Set { name } => handle_set_cmd(ctx, name, cfg, &gsettings),
+        Commands::Set { name, lock, unlock } => handle_set_cmd(ctx, name, lock, unlock, cfg, &gsettings),
         Commands::Get => handle_get_cmd(ctx, &gsettings),
         Commands::Edit { editor } => handle_edit_cmd(ctx, editor, args.config),
     }
     Ok(())
 }
 
-fn handle_set_cmd(_ctx: &mut Context, theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
+fn handle_set_cmd(
+    ctx: &mut Context,
+    theme_name: Option<String>,
+    lock_theme: bool,
+    unlock_theme: bool,
+    cfg: Config,
+    gset: &Gsettings,
+) {
     info!("Running Set command");
     // First we check whether user specified a concrete theme
     // If no concrete theme was specified we look for theme assigned to current time
@@ -29,12 +35,14 @@ fn handle_set_cmd(_ctx: &mut Context, theme_name: Option<String>, cfg: Config, g
         // If so, we check wheter theme of given name is present in config file
         // In case such theme does not exist we print error and exit gracefully
         if let Some(theme) = cfg.theme_for_name(&name) {
-            gset.set_theme(theme)
+            gset.set_theme(theme);
+            maybe_lock_or_unlock(ctx, name.borrow(), lock_theme, unlock_theme)
         } else {
             error!("Failed to find theme for given name: {}", name);
         }
     } else if let Some(theme) = cfg.theme_for_time(Local::now()) {
         gset.set_theme(theme);
+        maybe_lock_or_unlock(ctx, theme.name.borrow(), lock_theme, unlock_theme)
     } else {
         error!("Failed to find theme for current time -- not taking any action");
     }
@@ -97,5 +105,13 @@ fn open_editor(editor: &str, config_path: &Path) {
         Err(err) => {
             warn!("Failed to open the editor, reported error: {}", err);
         }
+    }
+}
+
+fn maybe_lock_or_unlock(ctx: &mut Context, theme: &str, lock: bool, unlock: bool) {
+    if lock {
+        ctx.data.lock_theme(theme);
+    } else if unlock {
+        ctx.data.unlock_theme();
     }
 }
