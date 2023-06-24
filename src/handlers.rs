@@ -7,20 +7,20 @@ use crate::{
     cli::Args,
     command::Commands,
     config::Config,
-    gsettings::Gsettings,
+    gsettings::Gsettings, context::Context,
 };
 
-pub fn handle_cmd(args: Args, cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
+pub fn handle_cmd(ctx: &mut Context, args: Args, cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
     let gsettings = Gsettings::new();
     match args.command {
-        Commands::Set { name } => handle_set_cmd(name, cfg, &gsettings),
-        Commands::Get => handle_get_cmd(&gsettings),
-        Commands::Edit { editor } => handle_edit_cmd(editor, args.config),
+        Commands::Set { name } => handle_set_cmd(ctx, name, cfg, &gsettings),
+        Commands::Get => handle_get_cmd(ctx, &gsettings),
+        Commands::Edit { editor } => handle_edit_cmd(ctx, editor, args.config),
     }
     Ok(())
 }
 
-fn handle_set_cmd(theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
+fn handle_set_cmd(_ctx: &mut Context, theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
     info!("Running Set command");
     // First we check whether user specified a concrete theme
     // If no concrete theme was specified we look for theme assigned to current time
@@ -40,13 +40,13 @@ fn handle_set_cmd(theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
     }
 }
 
-fn handle_get_cmd(gset: &Gsettings) {
+fn handle_get_cmd(_ctx: &mut Context, gset: &Gsettings) {
     info!("Running Get command");
     let theme = gset.get_theme();
     info!("Current theme spec\n{:?}", theme);
 }
 
-fn handle_edit_cmd(editor: Option<String>, cli_cfg_path: Option<PathBuf>) {
+fn handle_edit_cmd(_ctx: &mut Context, editor: Option<String>, cli_cfg_path: Option<PathBuf>) {
     info!("Running Edit command");
 
     trace!("Resolving config path");
