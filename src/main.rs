@@ -45,6 +45,15 @@ enum Commands {
 
   /// Retrieves current configuration and prints it to logfile or stdout
   Get,
+
+  /// Opens config file in a editor allowing for modification
+  Edit {
+    // Path do editor binary. It will be called in a following way:
+    // editor PATH_TO_CONFIG_FILE
+    // If not specified $EDITOR env var will be used. If that is not defined the operation is a
+    // noop.
+    editor: Option<String>,
+  }
 }
 
 fn init_logging(cli: &Cli) -> Handle {
@@ -112,11 +121,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       } else {
         error!("Failed to find theme for current time -- not taking any action");
       }
-    }
+    },
     Commands::Get => {
       let theme = gsettings.get_theme();
       info!("Current theme spec\n{:?}", theme);
+    },
+    Commands::Edit { editor } => {
+        
     }
+
   }
   Ok(())
 }
