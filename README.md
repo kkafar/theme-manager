@@ -13,7 +13,7 @@ git clone git@github.com:kkafar/theme-manager.git theme-manager
 cargo install --path theme-manager
 ```
 
-To run this tool periodicaly [`cron`](https://en.wikipedia.org/wiki/Cron) can be used:
+To run this tool periodically [`cron`](https://en.wikipedia.org/wiki/Cron) can be used:
 
 ```
 SHELL=/bin/bash
