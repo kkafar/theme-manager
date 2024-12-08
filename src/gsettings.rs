@@ -1,13 +1,14 @@
 use libc::geteuid;
 use log::{debug, error, info};
 use std::{
-    path::PathBuf,
-    process::{Command, ExitStatus, Output, Stdio},
+    borrow::Borrow, path::PathBuf, process::{Command, ExitStatus, Output, Stdio}
 };
 
 use crate::theme::{Theme, ThemeSpec};
 
 const DBUS_SESSION_BUS_ADDRESS_KEY: &str = "DBUS_SESSION_BUS_ADDRESS";
+const ORG_CINNAMON_DESKTOP_INTERFACE_SCHEMA: &str = "org.cinnamon.desktop.interface";
+const ORG_GNOME_DESKTOP_INTERFACE_SCHEMA: &str = "org.gnome.desktop.interface";
 
 /// Handles command result / command failure
 fn handle_result(result: Result<ExitStatus, std::io::Error>, success_msg: String, failure_msg: String) {
@@ -40,17 +41,17 @@ fn handle_get_result(result: std::io::Result<Output>) -> Result<String, String> 
     }
 }
 
-pub struct Gsettings {
+pub struct GSettings {
     dbus_session_bus_address: String,
 }
 
-impl Gsettings {
+impl GSettings {
     pub fn new() -> Self {
         // Can I check somehow whether this call failed?
         // Or does in not fail?
         let euid = unsafe { geteuid() };
         debug!("Creating Gsettings insance with euid: {}", euid);
-        Gsettings {
+        GSettings {
             dbus_session_bus_address: format!("unix:path=/run/user/{}/bus", euid),
         }
     }
@@ -249,6 +250,35 @@ impl Gsettings {
         handle_get_result(result)
     }
 
+    /// Sets theme preference regarding light / dark mode
+    fn set_theme_preference(&self, color_scheme_preference: &str) {
+
+        let result = Command::new("gsettings")
+            .arg("set")
+            .arg(ORG_GNOME_DESKTOP_INTERFACE_SCHEMA)
+            .arg("color-scheme")
+            .arg(color_scheme_preference)
+            .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+            .status();
+
+        handle_result(
+            result,
+            format!("Theme preference set to: {}", color_scheme_preference),
+            format!("Failed to set theme preference to: {}", color_scheme_preference),
+        );
+    }
+
+    fn get_theme_preference(&self) -> Result<String, String> {
+        let result = Command::new("gsettings")
+            .arg("get")
+            .arg(ORG_GNOME_DESKTOP_INTERFACE_SCHEMA)
+            .arg("color-scheme")
+            .env(DBUS_SESSION_BUS_ADDRESS_KEY, &self.dbus_session_bus_address)
+            .output();
+
+        handle_get_result(result)
+    }
+
     pub fn set_theme(&self, theme: &Theme) {
         // First we retrieve current theme
         let current_theme_spec = self.get_theme();
@@ -277,6 +307,10 @@ impl Gsettings {
             self.set_wallpaper(theme.spec.wallpaper.to_str().unwrap());
         }
 
+        if current_theme_spec.color_scheme_preference != theme.spec.color_scheme_preference {
+            self.set_theme_preference(theme.spec.color_scheme_preference.borrow());
+        }
+
         if let Some(kitty_theme) = &theme.spec.kitty {
             if let Some(crt_kitty_theme) = current_theme_spec.kitty {
                 if crt_kitty_theme != *kitty_theme {
@@ -296,6 +330,7 @@ impl Gsettings {
         let borders = self.get_borders().unwrap_or_else(|err| err);
         let wallpaper = PathBuf::from(self.get_wallpaper().unwrap_or_else(|err| err));
         let kitty_theme = self.get_kitty().unwrap_or_else(|err| err);
+        let color_scheme_preference = self.get_theme_preference().unwrap_or_else(|err| err);
 
         ThemeSpec {
             desktop,
@@ -305,6 +340,7 @@ impl Gsettings {
             borders,
             wallpaper,
             kitty: Some(kitty_theme),
+            color_scheme_preference,
         }
     }
 }

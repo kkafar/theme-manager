@@ -7,10 +7,10 @@ use std::{
 use chrono::Local;
 use log::{error, info, trace, warn};
 
-use crate::{cli::Args, command::Commands, config::Config, context::Context, gsettings::Gsettings};
+use crate::{cli::Args, command::Commands, config::Config, context::Context, gsettings::GSettings};
 
 pub fn handle_cmd(ctx: &mut Context, args: Args, cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
-    let gsettings = Gsettings::new();
+    let gsettings = GSettings::new();
     match args.command {
         Commands::Set { name } => handle_set_cmd(ctx, name, cfg, &gsettings),
         Commands::Get => handle_get_cmd(ctx, &gsettings),
@@ -21,7 +21,7 @@ pub fn handle_cmd(ctx: &mut Context, args: Args, cfg: Config) -> Result<(), Box<
     Ok(())
 }
 
-fn handle_set_cmd(ctx: &mut Context, theme_name: Option<String>, cfg: Config, gset: &Gsettings) {
+fn handle_set_cmd(ctx: &mut Context, theme_name: Option<String>, cfg: Config, gset: &GSettings) {
     info!("Running Set command");
 
     // First we check whether user specified a concrete theme
@@ -46,7 +46,7 @@ fn handle_set_cmd(ctx: &mut Context, theme_name: Option<String>, cfg: Config, gs
     }
 }
 
-fn handle_get_cmd(_ctx: &mut Context, gset: &Gsettings) {
+fn handle_get_cmd(_ctx: &mut Context, gset: &GSettings) {
     info!("Running Get command");
     let theme = gset.get_theme();
     info!("Current theme spec\n{:?}", theme);
@@ -124,5 +124,6 @@ fn maybe_lock_or_unlock(ctx: &mut Context, theme: &str, lock: bool, unlock: bool
 }
 
 fn is_theme_locked(ctx: &mut Context) -> bool {
+    // Alternatively we could use some small sqlite db here
     ctx.data.theme_lock_file.is_file()
 }
