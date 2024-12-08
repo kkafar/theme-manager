@@ -1,3 +1,5 @@
+mod theme_type;
+
 use chrono::{DateTime, Local, Timelike};
 use itertools::Itertools;
 use serde::Deserialize;
@@ -12,6 +14,7 @@ pub struct ThemeSpec {
     pub borders: String,
     pub wallpaper: PathBuf,
     pub kitty: Option<String>,
+    pub color_scheme_preference: String,
 }
 
 #[derive(Deserialize, Debug, Clone, Copy)]
